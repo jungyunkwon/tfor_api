@@ -3,7 +3,7 @@ create extension if not exists pgcrypto;
 -- =========================================================
 -- 공통 코드
 -- =========================================================
-create table public.tb_code_group (
+create table if not exists public.tb_code_group (
     code_group_id      uuid primary key default gen_random_uuid(),
     code_group_key     varchar(100) not null unique,
     code_group_name    varchar(200) not null,
@@ -21,7 +21,7 @@ comment on table public.tb_code_group is '공통 코드 그룹';
 comment on column public.tb_code_group.code_group_key is '코드 그룹 식별자';
 comment on column public.tb_code_group.code_group_name is '코드 그룹명';
 
-create table public.tb_code (
+create table if not exists public.tb_code (
     code_id            uuid primary key default gen_random_uuid(),
     code_group_id      uuid not null references public.tb_code_group(code_group_id),
     code_key           varchar(100) not null,
@@ -46,7 +46,7 @@ comment on column public.tb_code.code_value is '시스템 내부 값';
 -- =========================================================
 -- 사용자 / 인증 / 권한
 -- =========================================================
-create table public.tb_user (
+create table if not exists public.tb_user (
     user_id                    uuid primary key,
     user_status_cd             varchar(30) not null,
     join_type_cd               varchar(30) not null,
@@ -73,7 +73,7 @@ comment on table public.tb_user is '회원 기본 테이블';
 comment on column public.tb_user.user_id is '사용자 ID(auth.users.id와 동일하게 사용 권장)';
 comment on column public.tb_user.matching_locked_yn is '평가 전 다음 매칭 잠금 여부';
 
-create table public.tb_user_auth (
+create table if not exists public.tb_user_auth (
     user_auth_id               uuid primary key default gen_random_uuid(),
     user_id                    uuid not null unique references public.tb_user(user_id) on delete cascade,
     login_id                   varchar(255),
@@ -101,7 +101,7 @@ comment on table public.tb_user_auth is '사용자 인증 정보';
 comment on column public.tb_user_auth.provider_cd is '로그인 제공자 코드(KAKAO, GOOGLE 등)';
 comment on column public.tb_user_auth.provider_user_key is '외부 인증 제공자 사용자 식별값';
 
-create table public.tb_role (
+create table if not exists public.tb_role (
     role_id            uuid primary key default gen_random_uuid(),
     role_key           varchar(50) not null unique,
     role_name          varchar(100) not null,
@@ -117,7 +117,7 @@ create table public.tb_role (
 
 comment on table public.tb_role is '역할 마스터';
 
-create table public.tb_user_role (
+create table if not exists public.tb_user_role (
     user_role_id       uuid primary key default gen_random_uuid(),
     user_id            uuid not null references public.tb_user(user_id) on delete cascade,
     role_id            uuid not null references public.tb_role(role_id),
@@ -135,7 +135,7 @@ comment on table public.tb_user_role is '사용자-역할 매핑';
 -- =========================================================
 -- 약관 / 프로필 / 사진 / 설문
 -- =========================================================
-create table public.tb_terms (
+create table if not exists public.tb_terms (
     terms_id              uuid primary key default gen_random_uuid(),
     terms_type_cd         varchar(30) not null,
     terms_version         varchar(30) not null,
@@ -158,7 +158,7 @@ create table public.tb_terms (
 
 comment on table public.tb_terms is '약관 마스터';
 
-create table public.tb_user_terms_agreement (
+create table if not exists public.tb_user_terms_agreement (
     user_terms_agreement_id   uuid primary key default gen_random_uuid(),
     user_id                   uuid not null references public.tb_user(user_id) on delete cascade,
     terms_id                  uuid not null references public.tb_terms(terms_id),
@@ -178,7 +178,7 @@ create table public.tb_user_terms_agreement (
 
 comment on table public.tb_user_terms_agreement is '사용자 약관 동의 이력';
 
-create table public.tb_user_profile (
+create table if not exists public.tb_user_profile (
     user_profile_id        uuid primary key default gen_random_uuid(),
     user_id                uuid not null unique references public.tb_user(user_id) on delete cascade,
     nickname               varchar(100) not null,
@@ -211,7 +211,7 @@ create table public.tb_user_profile (
 comment on table public.tb_user_profile is '회원 프로필';
 comment on column public.tb_user_profile.profile_open_yn is '프로필 노출 여부';
 
-create table public.tb_profile_photo (
+create table if not exists public.tb_profile_photo (
     profile_photo_id       uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id) on delete cascade,
     photo_type_cd          varchar(30) not null,
@@ -237,7 +237,7 @@ comment on table public.tb_profile_photo is '회원 프로필 사진';
 comment on column public.tb_profile_photo.photo_type_cd is '사진 유형(FACE, FULL_BODY 등)';
 comment on column public.tb_profile_photo.approval_status_cd is '사진 승인 상태';
 
-create table public.tb_survey_question (
+create table if not exists public.tb_survey_question (
     survey_question_id     uuid primary key default gen_random_uuid(),
     question_code          varchar(50) not null unique,
     question_group_cd      varchar(30) not null,
@@ -261,7 +261,7 @@ create table public.tb_survey_question (
 comment on table public.tb_survey_question is '설문 질문';
 comment on column public.tb_survey_question.admin_only_yn is '관리자만 열람 가능한 질문 여부';
 
-create table public.tb_survey_option (
+create table if not exists public.tb_survey_option (
     survey_option_id       uuid primary key default gen_random_uuid(),
     survey_question_id     uuid not null references public.tb_survey_question(survey_question_id) on delete cascade,
     option_text            varchar(300) not null,
@@ -281,7 +281,7 @@ create table public.tb_survey_option (
 
 comment on table public.tb_survey_option is '설문 선택지';
 
-create table public.tb_user_survey_answer (
+create table if not exists public.tb_user_survey_answer (
     user_survey_answer_id  uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id) on delete cascade,
     survey_question_id     uuid not null references public.tb_survey_question(survey_question_id) on delete cascade,
@@ -304,7 +304,7 @@ comment on table public.tb_user_survey_answer is '사용자 설문 응답';
 -- =========================================================
 -- 보석 / 결제
 -- =========================================================
-create table public.tb_user_balance (
+create table if not exists public.tb_user_balance (
     user_balance_id        uuid primary key default gen_random_uuid(),
     user_id                uuid not null unique references public.tb_user(user_id) on delete cascade,
     balance_amount         integer not null default 0,
@@ -319,7 +319,7 @@ create table public.tb_user_balance (
 
 comment on table public.tb_user_balance is '사용자 보석 현재 잔액';
 
-create table public.tb_product (
+create table if not exists public.tb_product (
     product_id             uuid primary key default gen_random_uuid(),
     product_type_cd        varchar(30) not null,
     product_name           varchar(200) not null,
@@ -341,7 +341,7 @@ create table public.tb_product (
 comment on table public.tb_product is '결제 상품';
 comment on column public.tb_product.gem_amount is '상품 구매 시 지급 보석 수량';
 
-create table public.tb_payment (
+create table if not exists public.tb_payment (
     payment_id             uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id),
     product_id             uuid not null references public.tb_product(product_id),
@@ -365,7 +365,7 @@ create table public.tb_payment (
 
 comment on table public.tb_payment is '결제 이력';
 
-create table public.tb_user_balance_txn (
+create table if not exists public.tb_user_balance_txn (
     user_balance_txn_id    uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id),
     txn_type_cd            varchar(30) not null,
@@ -392,7 +392,7 @@ comment on column public.tb_user_balance_txn.balance_after_amount is '거래 반
 -- =========================================================
 -- 호감 / 매칭 / 채팅 / 평가
 -- =========================================================
-create table public.tb_like (
+create table if not exists public.tb_like (
     like_id                uuid primary key default gen_random_uuid(),
     sender_user_id         uuid not null references public.tb_user(user_id) on delete cascade,
     receiver_user_id       uuid not null references public.tb_user(user_id) on delete cascade,
@@ -414,7 +414,7 @@ create table public.tb_like (
 comment on table public.tb_like is '호감 요청 이력';
 comment on column public.tb_like.expire_dt is '호감 응답 만료 일시(7일 정책)';
 
-create table public.tb_match (
+create table if not exists public.tb_match (
     match_id               uuid primary key default gen_random_uuid(),
     like_id                uuid unique references public.tb_like(like_id),
     user_1_id              uuid not null references public.tb_user(user_id) on delete cascade,
@@ -439,7 +439,7 @@ create table public.tb_match (
 comment on table public.tb_match is '매칭 성사 관계';
 comment on column public.tb_match.match_status_cd is '매칭 상태(ACTIVE, LOCKED_FOR_REVIEW, ENDED 등)';
 
-create table public.tb_chat_room (
+create table if not exists public.tb_chat_room (
     chat_room_id           uuid primary key default gen_random_uuid(),
     match_id               uuid not null unique references public.tb_match(match_id) on delete cascade,
     room_status_cd         varchar(30) not null default 'ACTIVE',
@@ -455,7 +455,7 @@ create table public.tb_chat_room (
 
 comment on table public.tb_chat_room is '채팅방';
 
-create table public.tb_chat_message (
+create table if not exists public.tb_chat_message (
     chat_message_id        uuid primary key default gen_random_uuid(),
     chat_room_id           uuid not null references public.tb_chat_room(chat_room_id) on delete cascade,
     sender_user_id         uuid not null references public.tb_user(user_id) on delete cascade,
@@ -474,7 +474,7 @@ create table public.tb_chat_message (
 
 comment on table public.tb_chat_message is '채팅 메시지';
 
-create table public.tb_contact_exchange (
+create table if not exists public.tb_contact_exchange (
     contact_exchange_id    uuid primary key default gen_random_uuid(),
     match_id               uuid not null unique references public.tb_match(match_id) on delete cascade,
     user_1_agree_yn        char(1) not null default 'N',
@@ -496,7 +496,7 @@ create table public.tb_contact_exchange (
 
 comment on table public.tb_contact_exchange is '연락처 공개 상호 동의 정보';
 
-create table public.tb_match_review (
+create table if not exists public.tb_match_review (
     match_review_id        uuid primary key default gen_random_uuid(),
     match_id               uuid not null references public.tb_match(match_id) on delete cascade,
     writer_user_id         uuid not null references public.tb_user(user_id) on delete cascade,
@@ -522,7 +522,7 @@ create table public.tb_match_review (
 
 comment on table public.tb_match_review is '매칭 종료 후 평가';
 
-create table public.tb_block (
+create table if not exists public.tb_block (
     block_id               uuid primary key default gen_random_uuid(),
     blocker_user_id        uuid not null references public.tb_user(user_id) on delete cascade,
     blocked_user_id        uuid not null references public.tb_user(user_id) on delete cascade,
@@ -541,7 +541,7 @@ create table public.tb_block (
 
 comment on table public.tb_block is '사용자 차단';
 
-create table public.tb_report (
+create table if not exists public.tb_report (
     report_id              uuid primary key default gen_random_uuid(),
     reporter_user_id       uuid not null references public.tb_user(user_id) on delete cascade,
     target_user_id         uuid not null references public.tb_user(user_id) on delete cascade,
@@ -566,7 +566,7 @@ comment on table public.tb_report is '신고 이력';
 -- =========================================================
 -- 알림 / 컨텐츠 / 문의
 -- =========================================================
-create table public.tb_alarm (
+create table if not exists public.tb_alarm (
     alarm_id               uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id) on delete cascade,
     alarm_type_cd          varchar(30) not null,
@@ -588,7 +588,7 @@ create table public.tb_alarm (
 
 comment on table public.tb_alarm is '사용자 알림';
 
-create table public.tb_alarm_log (
+create table if not exists public.tb_alarm_log (
     alarm_log_id           uuid primary key default gen_random_uuid(),
     alarm_id               uuid not null references public.tb_alarm(alarm_id) on delete cascade,
     send_channel_cd        varchar(30) not null,
@@ -607,7 +607,7 @@ create table public.tb_alarm_log (
 
 comment on table public.tb_alarm_log is '알림 발송 로그';
 
-create table public.tb_content (
+create table if not exists public.tb_content (
     content_id             uuid primary key default gen_random_uuid(),
     content_type_cd        varchar(30) not null,
     title                  varchar(300) not null,
@@ -625,7 +625,7 @@ create table public.tb_content (
 
 comment on table public.tb_content is '운영 컨텐츠';
 
-create table public.tb_inquiry (
+create table if not exists public.tb_inquiry (
     inquiry_id             uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.tb_user(user_id) on delete cascade,
     inquiry_type_cd        varchar(30) not null,
@@ -642,7 +642,7 @@ create table public.tb_inquiry (
 
 comment on table public.tb_inquiry is '1:1 문의';
 
-create table public.tb_inquiry_answer (
+create table if not exists public.tb_inquiry_answer (
     inquiry_answer_id      uuid primary key default gen_random_uuid(),
     inquiry_id             uuid not null unique references public.tb_inquiry(inquiry_id) on delete cascade,
     answer_user_id         uuid references public.tb_user(user_id),
@@ -661,7 +661,7 @@ comment on table public.tb_inquiry_answer is '문의 답변';
 -- =========================================================
 -- 보안 / 감사 / 운영
 -- =========================================================
-create table public.tb_login_history (
+create table if not exists public.tb_login_history (
     login_history_id       uuid primary key default gen_random_uuid(),
     user_id                uuid references public.tb_user(user_id),
     login_type_cd          varchar(30),
@@ -683,7 +683,7 @@ create table public.tb_login_history (
 
 comment on table public.tb_login_history is '로그인 성공/실패 이력';
 
-create table public.tb_audit_log (
+create table if not exists public.tb_audit_log (
     audit_log_id           uuid primary key default gen_random_uuid(),
     actor_user_id          uuid references public.tb_user(user_id),
     action_cd              varchar(30) not null,
@@ -704,7 +704,7 @@ create table public.tb_audit_log (
 
 comment on table public.tb_audit_log is '주요 데이터 변경 감사 로그';
 
-create table public.tb_data_access_log (
+create table if not exists public.tb_data_access_log (
     data_access_log_id     uuid primary key default gen_random_uuid(),
     user_id                uuid references public.tb_user(user_id),
     target_table_name      varchar(100) not null,
@@ -723,7 +723,7 @@ create table public.tb_data_access_log (
 
 comment on table public.tb_data_access_log is '조회/다운로드 등 열람 로그';
 
-create table public.tb_security_event (
+create table if not exists public.tb_security_event (
     security_event_id      uuid primary key default gen_random_uuid(),
     user_id                uuid references public.tb_user(user_id),
     event_type_cd          varchar(30) not null,
@@ -744,7 +744,7 @@ create table public.tb_security_event (
 
 comment on table public.tb_security_event is '보안 이상 이벤트';
 
-create table public.tb_api_log (
+create table if not exists public.tb_api_log (
     api_log_id             uuid primary key default gen_random_uuid(),
     user_id                uuid references public.tb_user(user_id),
     trace_id               varchar(100),
